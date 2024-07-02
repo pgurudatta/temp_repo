@@ -1,43 +1,42 @@
 /*
-Sample code for vulnerable type: Clear Text Logging
-CWE : CWE-200, CWE-312
-Description : Exposure of Sensitive Information to an Unauthorized Actor, Cleartext Storage of Sensitive Information
+Sample code for vulnerable type: Path Traversal
+CWE : CWE-23
+Description : Relative Path Traversal
 */
+
 package main
 
 import (
-	"fmt"
-	"log"
+        "fmt"
+        "net/http"
+        "io/ioutil"
+        "path/filepath"
 )
 
-type User struct {
-	ID       string
-	Password string
-}
-var userDatabase = map[string]User{
-	"john_doe": {"john_doe", "secretpassword123"},
-	"jane_doe": {"jane_doe", "anothersecretpassword"},
-}
-
 func main() {
-	userID := "john_doe"
-        password := "secretpassword123" //source
-	// Authenticate user
-	if authenticate(userID, password) {
-		fmt.Println("Login successful!")
-	} else {
-		fmt.Println("Login failed. Invalid credentials.")
-	}
+        // Handle requests to the "/readfile" endpoint
+        http.HandleFunc("/readfile", func(w http.ResponseWriter, r *http.Request) {
+                // Extract the file name from the URL query parameters
+                fileName := r.URL.Query().Get("file") //source
+                // Check if the file name is empty
+                if fileName == "" {
+                        http.Error(w, "File name not provided", http.StatusBadRequest)
+                        return
+                }
+                // Construct the absolute path to the file
+                filePath := filepath.Join("uploads", fileName)
+                // Attempt to read the file
+                data, err := ioutil.ReadFile(filePath)  //sink
+                if err != nil {
+                        // If there's an error reading the file, return an internal server error
+                        http.Error(w, "Failed to read file", http.StatusInternalServerError)
+                        return
+                }
+                // Write the file content to the response
+                fmt.Fprintf(w, "%s", data)
+        })
+
+        // Start the HTTP server and listen for incoming requests on port 8080
+        http.ListenAndServe(":8080", nil)
 }
 
-func authenticate(userID, password string) bool {
-	log.Printf("Attempting login with userID: %s, password: %s", userID, password) //sink
-	user, ok := userDatabase[userID]
-	if !ok {
-		// User not found
-		return false
-	}
-
-	// Check if the provided password matches the stored password
-	return user.Password == password
-}
