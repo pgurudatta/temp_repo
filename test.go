@@ -11,7 +11,6 @@ import (
 	"fmt"
 )
 
-// Source: GenerateRSAKeyPair generates an RSA private key pair.
 func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, error) {
 	pvk, err := rsa.GenerateKey(rand.Reader, bits)  //Sink
 	if err != nil {
@@ -32,7 +31,5 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
-	// Print or use the private key (sink)
 	PrintPrivateKey(pvk)
 }
