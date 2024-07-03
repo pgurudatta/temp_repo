@@ -1,56 +1,33 @@
 package main
 
 import (
-	"crypto/tls"
+	"crypto/rand"
+	"crypto/rsa"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
 )
 
-// CreateInsecureHTTPClient creates an insecure HTTP client.
-func CreateInsecureHTTPClient() *http.Client {
-	// Disable certificate validation (INSECURE - DO NOT USE IN PRODUCTION)
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+// Source: GenerateRSAKeyPair generates an RSA private key pair.
+func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, error) {
+	pvk, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate RSA key pair: %v", err)
 	}
-	client := &http.Client{Transport: tr}
-	return client
+	return pvk, nil
 }
 
-// SendHTTPRequest sends an HTTP GET request using the provided client.
-func SendHTTPRequest(client *http.Client, url string) ([]byte, error) {
-	// Send HTTP GET request to the URL
-	resp, err := client.Get(url)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send GET request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Read response body
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %v", err)
-	}
-
-	fmt.Printf("Response Status: %s\n", resp.Status)
-	fmt.Printf("Response Body: %s\n", body)
-
-	return body, nil
+// Sink: PrintPrivateKey prints the private key to stdout.
+func PrintPrivateKey(pvk *rsa.PrivateKey) {
+	fmt.Println(pvk)
 }
 
 func main() {
-	url := "https://example.com"
-
-	// Create insecure HTTP client
-	client := CreateInsecureHTTPClient()
-
-	// Send HTTP GET request using the created client
-	body, err := SendHTTPRequest(client, url)
+	// Generate RSA private key pair (source)
+	pvk, err := GenerateRSAKeyPair(1024)
 	if err != nil {
-		log.Fatalf("Error: %v", err)
+		fmt.Println(err)
+		return
 	}
 
-	// Use the response body as needed
-	_ = body // Example usage
+	// Print or use the private key (sink)
+	PrintPrivateKey(pvk)
 }
