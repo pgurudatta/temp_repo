@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-// CreateHTTPClient creates an HTTP client with insecure TLS configuration.
-func CreateHTTPClient() *http.Client {
+// CreateInsecureHTTPClient creates an insecure HTTP client.
+func CreateInsecureHTTPClient() *http.Client {
 	// Disable certificate validation (INSECURE - DO NOT USE IN PRODUCTION)
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -42,8 +42,8 @@ func SendHTTPRequest(client *http.Client, url string) ([]byte, error) {
 func main() {
 	url := "https://example.com"
 
-	// Create HTTP client with insecure TLS configuration
-	client := CreateHTTPClient()
+	// Create insecure HTTP client
+	client := CreateInsecureHTTPClient()
 
 	// Send HTTP GET request using the created client
 	body, err := SendHTTPRequest(client, url)
