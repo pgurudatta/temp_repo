@@ -1,35 +1,40 @@
 /*
-Sample code for vulnerable type: Inadequate Encryption Strength
-CWE : CWE-326
-Description : Inadequate Encryption Strength
+Sample code for vulnerable type: Insecure TLS Configuration
+CWE : CWE-327
+Description : Insecure TLS Configuration
 */
 package main
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
+	"crypto/tls"
 	"fmt"
+	"net/http"
 )
 
-func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, error) {
-	pvk, err := rsa.GenerateKey(rand.Reader, bits)  //Sink
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate RSA key pair: %v", err)
-	}
-	return pvk, nil
-}
-
-// Sink: PrintPrivateKey prints the private key to stdout.
-func PrintPrivateKey(pvk *rsa.PrivateKey) {
-	fmt.Println(pvk)
-}
-
 func main() {
-	// Generate RSA private key pair (source)
-	pvk, err := GenerateRSAKeyPair(1024)  //Source
+	// Vulnerable: Using insecure protocol and cipher suite
+	config := &tls.Config{
+		MinVersion: tls.VersionSSL30, // source and sink
+		CipherSuites: []uint16{
+			tls.TLS_RSA_WITH_RC4_128_MD5, // Insecure!
+		},
+	}
+
+	// Create an HTTP server with the provided TLS configuration
+	server := &http.Server{
+		Addr:      ":8080",
+		TLSConfig: config,
+	}
+
+	// Define a handler function for the root path
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, TLS!\n")
+	})
+
+	// Start the server with TLS enabled
+	err := server.ListenAndServeTLS("cert.pem", "key.pem")
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Failed to start server: %s\n", err)
 		return
 	}
-	PrintPrivateKey(pvk)
 }
