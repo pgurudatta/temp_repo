@@ -1,3 +1,8 @@
+/*
+Sample code for vulnerable type: Inadequate Encryption Strength
+CWE : CWE-326
+Description : Inadequate Encryption Strength
+*/
 package main
 
 import (
@@ -8,7 +13,7 @@ import (
 
 // Source: GenerateRSAKeyPair generates an RSA private key pair.
 func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, error) {
-	pvk, err := rsa.GenerateKey(rand.Reader, bits)
+	pvk, err := rsa.GenerateKey(rand.Reader, bits)  //Sink
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate RSA key pair: %v", err)
 	}
@@ -22,7 +27,7 @@ func PrintPrivateKey(pvk *rsa.PrivateKey) {
 
 func main() {
 	// Generate RSA private key pair (source)
-	pvk, err := GenerateRSAKeyPair(1024)
+	pvk, err := GenerateRSAKeyPair(1024)  //Source
 	if err != nil {
 		fmt.Println(err)
 		return
