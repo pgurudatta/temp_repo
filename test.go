@@ -1,40 +1,39 @@
 /*
-Sample code for vulnerable type: Insecure TLS Configuration
-CWE : CWE-327
-Description : Insecure TLS Configuration
+Sample code for vulnerable type: Use of Insufficiently Random Values
+CWE : CWE-330
+Description : Use of Insufficiently Random Values
 */
 package main
 
 import (
-	"crypto/tls"
-	"fmt"
-	"net/http"
+	"math/rand"
 )
 
+var charset = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+// Function to generate a random password
+func generatePassword() string {
+	s := make([]rune, 20)
+	for i := range s {
+		s[i] = getRandomChar()
+	}
+	return string(s)
+}
+
+// Function to get a random character from the charset
+func getRandomChar() rune {
+	return charset[rand.Intn(len(charset))] // Source
+}
+
+// Function to print the generated password
+func printPassword(password string) {
+	println(password) // Sink
+}
+
 func main() {
-	// Vulnerable: Using insecure protocol and cipher suite
-	config := &tls.Config{
-		MinVersion: tls.VersionSSL30, // source and sink
-		CipherSuites: []uint16{
-			tls.TLS_RSA_WITH_RC4_128_MD5, // Insecure!
-		},
-	}
+	// Generate a random password
+	password := generatePassword()
 
-	// Create an HTTP server with the provided TLS configuration
-	server := &http.Server{
-		Addr:      ":8080",
-		TLSConfig: config,
-	}
-
-	// Define a handler function for the root path
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "Hello, TLS!\n")
-	})
-
-	// Start the server with TLS enabled
-	err := server.ListenAndServeTLS("cert.pem", "key.pem")
-	if err != nil {
-		fmt.Printf("Failed to start server: %s\n", err)
-		return
-	}
+	// Print the generated password
+	printPassword(password)
 }
