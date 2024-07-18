@@ -1,30 +1,22 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-
-	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree"
+    "fmt"
+    "os"
 )
 
-func main() {}
+func main() {
+    // Simulating a function that attempts to open a file
+    filename := "/etc/passwd" // Example sensitive file
+    err := openFile(filename)
+    if err != nil {
+        fmt.Printf("Failed to open file: %s\n", err.Error())
+        os.Exit(1)
+    }
+}
 
-func processRequest(r *http.Request, doc tree.Node) {
-	r.ParseForm()
-	username := r.Form.Get("username")   //source
-
-	// BAD: User input used directly in an XPath expression
-	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")   //sink
-	unsafeRes, _ := xPath.ExecBool(doc)
-	fmt.Println(unsafeRes)
-
-	// GOOD: Value of parameters is defined here instead of directly in the query
-	opt := func(o *goxpath.Opts) {
-		o.Vars["username"] = tree.String(username)
-	}
-	// GOOD: Uses parameters to avoid including user input directly in XPath expression
-	xPath = goxpath.MustParse("//users/user[login/text()=$username]/home_dir/text()")
-	safeRes, _ := xPath.ExecBool(doc, opt)
-	fmt.Println(safeRes)
+// Function to open a file (simulated)
+func openFile(filename string) error {
+    // Simulating an error condition where the file doesn't exist
+    return fmt.Errorf("file %s not found", filename)
 }
