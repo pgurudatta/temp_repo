@@ -12,10 +12,10 @@ func main() {}
 
 func processRequest(r *http.Request, doc tree.Node) {
 	r.ParseForm()
-	username := r.Form.Get("username")
+	username := r.Form.Get("username")   //source
 
 	// BAD: User input used directly in an XPath expression
-	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")
+	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")   //sink
 	unsafeRes, _ := xPath.ExecBool(doc)
 	fmt.Println(unsafeRes)
 
