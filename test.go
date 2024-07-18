@@ -1,41 +1,30 @@
-/*
-Sample code for vulnerable type: Use of a Broken or Risky Cryptographic Algorithm
-CWE : CWE-327
-Description : Use of a Broken or Risky Cryptographic Algorithm
-*/
-
 package main
 
 import (
-    "crypto/md5"
-    "fmt"
+	"fmt"
+	"net/http"
+
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree"
 )
 
-func main() {
-    password := "mysecretpassword"
+func main() {}
 
-    // Simulating storage of hashed password
-    hashedPassword := hashPassword(password)
+func processRequest(r *http.Request, doc tree.Node) {
+	r.ParseForm()
+	username := r.Form.Get("username")
 
-    // Simulating login attempt
-    loginAttempt := "mysecretpassword"
+	// BAD: User input used directly in an XPath expression
+	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")
+	unsafeRes, _ := xPath.ExecBool(doc)
+	fmt.Println(unsafeRes)
 
-    // Verify login
-    if checkPassword(loginAttempt, hashedPassword) {
-        fmt.Println("Login successful!")
-    } else {
-        fmt.Println("Login failed!")
-    }
-}
-
-// Function to hash the password using MD5 (vulnerable)
-func hashPassword(password string) string {
-    hash := md5.Sum([]byte(password))  //source and sink
-    return fmt.Sprintf("%x", hash)
-}
-
-// Function to check if the password matches the hashed value
-func checkPassword(password, hashedPassword string) bool {
-    // Recompute the hash of the provided password and compare
-    return hashedPassword == hashPassword(password)
+	// GOOD: Value of parameters is defined here instead of directly in the query
+	opt := func(o *goxpath.Opts) {
+		o.Vars["username"] = tree.String(username)
+	}
+	// GOOD: Uses parameters to avoid including user input directly in XPath expression
+	xPath = goxpath.MustParse("//users/user[login/text()=$username]/home_dir/text()")
+	safeRes, _ := xPath.ExecBool(doc, opt)
+	fmt.Println(safeRes)
 }
