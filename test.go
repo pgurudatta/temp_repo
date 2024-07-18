@@ -1,3 +1,9 @@
+/*
+Sample code for vulnerable type: Use of a Broken or Risky Cryptographic Algorithm
+CWE : CWE-327
+Description : Use of a Broken or Risky Cryptographic Algorithm
+*/
+
 package main
 
 import (
@@ -24,7 +30,7 @@ func main() {
 
 // Function to hash the password using MD5 (vulnerable)
 func hashPassword(password string) string {
-    hash := md5.Sum([]byte(password))
+    hash := md5.Sum([]byte(password))  //source and sink
     return fmt.Sprintf("%x", hash)
 }
 
