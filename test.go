@@ -6,21 +6,15 @@ import (
 )
 
 func main() {
-	username := "admin"
-	password := "s3cr3t"
-
-	err := login(username, password)
+	filename := "/etc/passwd" // Example sensitive filename
+	err := openFile(filename)
 	if err != nil {
-		fmt.Printf("Login failed: %s\n", err.Error())
+		fmt.Printf("Failed to open file: %s\n", err.Error())
 		os.Exit(1)
 	}
-	fmt.Println("Login successful!")
 }
 
-func login(username, password string) error {
-	// Simulating authentication logic
-	if username != "admin" || password != "s3cr3t" {
-		return fmt.Errorf("invalid credentials for user %s", username)
-	}
-	return nil
+func openFile(filename string) error {
+	// Simulating an error condition where the file doesn't exist
+	return fmt.Errorf("file %s not found", filename)
 }
