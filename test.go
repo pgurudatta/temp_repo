@@ -1,22 +1,26 @@
 package main
 
 import (
-    "fmt"
-    "os"
+	"fmt"
+	"os"
 )
 
 func main() {
-    // Simulating a function that attempts to open a file
-    filename := "/etc/passwd" // Example sensitive file
-    err := openFile(filename)
-    if err != nil {
-        fmt.Printf("Failed to open file: %s\n", err.Error())
-        os.Exit(1)
-    }
+	username := "admin"
+	password := "s3cr3t"
+
+	err := login(username, password)
+	if err != nil {
+		fmt.Printf("Login failed: %s\n", err.Error())
+		os.Exit(1)
+	}
+	fmt.Println("Login successful!")
 }
 
-// Function to open a file (simulated)
-func openFile(filename string) error {
-    // Simulating an error condition where the file doesn't exist
-    return fmt.Errorf("file %s not found", filename)
+func login(username, password string) error {
+	// Simulating authentication logic
+	if username != "admin" || password != "s3cr3t" {
+		return fmt.Errorf("invalid credentials for user %s", username)
+	}
+	return nil
 }
