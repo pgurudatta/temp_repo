@@ -1,45 +1,38 @@
 /*
-Sample code for vulnerable type: Server-Side Request Forgery (SSRF)
-CWE : CWE-918
-Description : Server-Side Request Forgery (SSRF)
+Sample code for vulnerable type: Sensitive Cookie Without 'HttpOnly' Flag
+CWE : CWE-1004
+Description : Sensitive Cookie Without 'HttpOnly' Flag
 */
 package main
+
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func main() {
-	http.HandleFunc("/fetch", handleFetch)
+	http.HandleFunc("/login", handleLogin)
 	http.ListenAndServe(":8080", nil)
 }
 
-func handleFetch(w http.ResponseWriter, r *http.Request) {
-	// Get the URL parameter from the request
-	url := r.URL.Query().Get("url")   //source
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	// Simulated login functionality (authenticate user)
+	authenticated := true
 
-	if url == "" {
-		http.Error(w, "URL parameter is required", http.StatusBadRequest)
-		return
+	if authenticated {
+		// Set a sensitive cookie without the "HttpOnly" flag
+		cookie := http.Cookie{
+			Name:     "sessionID",
+			Value:    "exampleSessionToken",
+			Expires:  time.Now().Add(24 * time.Hour), // Expires in 24 hours
+			Path:     "/",
+			HttpOnly: false, // Vulnerable: Cookie accessible to client-side JavaScript
+		}
+		http.SetCookie(w, &cookie)  //source and sink
+
+		fmt.Fprintf(w, "Login successful. Session cookie set.")
+	} else {
+		http.Error(w, "Authentication failed", http.StatusUnauthorized)
 	}
-
-	// Make an HTTP GET request to the specified URL (vulnerable to SSRF)
-	resp, err := http.Get(url)   //sink
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to fetch URL: %v", err), http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	// Read the response body and write it to the client's response
-	body := make([]byte, 1024)
-	_, err = resp.Body.Read(body)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to read response body: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	w.Write(body)
 }
