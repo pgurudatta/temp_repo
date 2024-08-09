@@ -1,28 +1,28 @@
 package main
 
 import (
-    "database/sql"
-    "fmt"
-    _ "github.com/go-sql-driver/mysql" // MySQL driver
+	"fmt"
+	"log"
+	"net/http"
 )
 
-// Simulate opening a database connection
-func openDbConnection() (*sql.DB, error) {
-    // Simulate a database connection error
-    return nil, fmt.Errorf("unable to connect to database: invalid credentials")
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
+
+	// Authenticate the user
+	if username == "admin" && password == "secretpassword" {
+		// Successful login
+		fmt.Fprintf(w, "Welcome, admin!")
+	} else {
+		// Failed login
+		errMsg := fmt.Sprintf("Login failed for user: %s", username)
+		log.Println(errMsg)
+		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+	}
 }
 
 func main() {
-    MysqlConfigLocation := "/path/to/mysql/config"
-
-    db, err := openDbConnection()
-    if err != nil {
-        // Print detailed error message including exception details and configuration file location
-        fmt.Printf("Caught exception: %s\n", err.Error())
-        fmt.Printf("Check credentials in config file at: %s\n", MysqlConfigLocation)
-        return
-    }
-
-    // Proceed with further processing if the connection is successful
-    fmt.Println("Database connection established:", db)
+	http.HandleFunc("/login", handleLogin)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
