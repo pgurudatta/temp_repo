@@ -1,31 +1,36 @@
+/*
+Sample code for vulnerable type: XPath Injection
+CWE : CWE-643
+Description : Improper Neutralization of Data within XPath Expressions ('XPath Injection')
+*/
+
 package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"os"
+
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree"
 )
 
-func main() {
-	http.HandleFunc("/", handleRequest)
-	log.Fatal(http.ListenAndServe(":8080", nil))
-}
+func main() {}
 
-func handleRequest(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
-	password := r.FormValue("password")
+func processRequest(r *http.Request, doc tree.Node) {
+	r.ParseForm()
+	username := r.Form.Get("username")   //source
 
-	// Log the sensitive information
-	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
+	// BAD: User input used directly in an XPath expression
+	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")   //sink
+	unsafeRes, _ := xPath.ExecBool(doc)
+	fmt.Println(unsafeRes)
+
+	// GOOD: Value of parameters is defined here instead of directly in the query
+	opt := func(o *goxpath.Opts) {
+		o.Vars["username"] = tree.String(username)
 	}
-	defer logFile.Close()
-
-	logger := log.New(logFile, "", log.LstdFlags)
-	logger.Printf("Sensitive information - Username: %s, Password: %s", username, password)
-
-	// Process the request
-	// ...
+	// GOOD: Uses parameters to avoid including user input directly in XPath expression
+	xPath = goxpath.MustParse("//users/user[login/text()=$username]/home_dir/text()")
+	safeRes, _ := xPath.ExecBool(doc, opt)
+	fmt.Println(safeRes)
 }
