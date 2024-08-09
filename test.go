@@ -1,36 +1,28 @@
-/*
-Sample code for vulnerable type: XPath Injection
-CWE : CWE-643
-Description : Improper Neutralization of Data within XPath Expressions ('XPath Injection')
-*/
-
 package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-
-	"github.com/ChrisTrenkamp/goxpath"
-	"github.com/ChrisTrenkamp/goxpath/tree"
 )
 
-func main() {}
+func handleLogin(w http.ResponseWriter, r *http.Request) {
+	username := r.FormValue("username")
+	password := r.FormValue("password")
 
-func processRequest(r *http.Request, doc tree.Node) {
-	r.ParseForm()
-	username := r.Form.Get("username")   //source
-
-	// BAD: User input used directly in an XPath expression
-	xPath := goxpath.MustParse("//users/user[login/text()='" + username + "']/home_dir/text()")   //sink
-	unsafeRes, _ := xPath.ExecBool(doc)
-	fmt.Println(unsafeRes)
-
-	// GOOD: Value of parameters is defined here instead of directly in the query
-	opt := func(o *goxpath.Opts) {
-		o.Vars["username"] = tree.String(username)
+	// Authenticate the user
+	if username == "admin" && password == "secretpassword" {
+		// Successful login
+		fmt.Fprintf(w, "Welcome, admin!")
+	} else {
+		// Failed login
+		errMsg := fmt.Sprintf("Login failed for user: %s with password: %s", username, password)
+		log.Println(errMsg) // Log the detailed error message
+		http.Error(w, fmt.Sprintf("Login failed for user: %s", username), http.StatusUnauthorized)
 	}
-	// GOOD: Uses parameters to avoid including user input directly in XPath expression
-	xPath = goxpath.MustParse("//users/user[login/text()=$username]/home_dir/text()")
-	safeRes, _ := xPath.ExecBool(doc, opt)
-	fmt.Println(safeRes)
+}
+
+func main() {
+	http.HandleFunc("/login", handleLogin)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
