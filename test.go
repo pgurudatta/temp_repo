@@ -15,10 +15,10 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		// Successful login
 		fmt.Fprintf(w, "Welcome, admin!")
 	} else {
-		// Failed login
+		// Failed login with detailed sensitive information
 		errMsg := fmt.Sprintf("Login failed for user: %s with password: %s", username, password)
-		log.Println(errMsg) // Log the detailed error message
-		http.Error(w, fmt.Sprintf("Login failed for user: %s", username), http.StatusUnauthorized)
+		log.Println("Detailed Error Message:", errMsg) // Log sensitive information
+		http.Error(w, fmt.Sprintf("Login failed for user: %s with password: %s", username, password), http.StatusUnauthorized) // Expose sensitive information in response
 	}
 }
 
