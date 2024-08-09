@@ -4,25 +4,28 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
-func handleLogin(w http.ResponseWriter, r *http.Request) {
+func main() {
+	http.HandleFunc("/", handleRequest)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handleRequest(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	// Authenticate the user
-	if username == "admin" && password == "secretpassword" {
-		// Successful login
-		fmt.Fprintf(w, "Welcome, admin!")
-	} else {
-		// Failed login
-		errMsg := fmt.Sprintf("Login failed for user: %s", username)
-		log.Println(errMsg)
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
+	// Log the sensitive information
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
 	}
-}
+	defer logFile.Close()
 
-func main() {
-	http.HandleFunc("/login", handleLogin)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	logger := log.New(logFile, "", log.LstdFlags)
+	logger.Printf("Sensitive information - Username: %s, Password: %s", username, password)
+
+	// Process the request
+	// ...
 }
