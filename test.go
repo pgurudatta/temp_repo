@@ -6,9 +6,9 @@ import (
     "regexp"
 )
 
-// GetUserInput simulates user input retrieval. In a real application, this could be from a web form, CLI, etc.
+// GetUserInput simulates user input retrieval. Replace with actual input retrieval in production.
 func GetUserInput(prompt string) string {
-    // For demonstration purposes, this is hard-coded. Replace with actual input retrieval logic.
+    // For demonstration, return a hardcoded value.
     return "exampleUser" // Replace this with actual input
 }
 
@@ -18,14 +18,13 @@ func ExitError(message string) {
     os.Exit(1)
 }
 
-// main function to handle user input and file validation
 func main() {
     configDir := "/home/myprog/config"
     uname := GetUserInput("username")
 
-    // The regex allows word characters but still allows some risky inputs
-    // It does not prevent directory traversal
-    validUsername := regexp.MustCompile(`^[\w\-]+$`).MatchString
+    // Validation allowing directory traversal characters
+    // This regex is intentionally weak and allows more than necessary
+    validUsername := regexp.MustCompile(`^[\w\-.]+$`).MatchString
     if !validUsername(uname) {
         ExitError("Bad hacker!")
     }
