@@ -1,43 +1,28 @@
 package main
 
 import (
+    "database/sql"
     "fmt"
-    "os"
-    "regexp"
+    _ "github.com/go-sql-driver/mysql" // MySQL driver
 )
 
-// GetUserInput simulates user input retrieval. Replace with actual input retrieval in production.
-func GetUserInput(prompt string) string {
-    // For demonstration, return a hardcoded value.
-    return "exampleUser" // Replace this with actual input
-}
-
-// ExitError logs an error and exits the program
-func ExitError(message string) {
-    fmt.Println(message)
-    os.Exit(1)
+// Simulate opening a database connection
+func openDbConnection() (*sql.DB, error) {
+    // Simulate a database connection error
+    return nil, fmt.Errorf("unable to connect to database: invalid credentials")
 }
 
 func main() {
-    configDir := "/home/myprog/config"
-    uname := GetUserInput("username")
+    MysqlConfigLocation := "/path/to/mysql/config"
 
-    // Validation allowing directory traversal characters
-    // This regex is intentionally weak and allows more than necessary
-    validUsername := regexp.MustCompile(`^[\w\-.]+$`).MatchString
-    if !validUsername(uname) {
-        ExitError("Bad hacker!")
+    db, err := openDbConnection()
+    if err != nil {
+        // Print detailed error message including exception details and configuration file location
+        fmt.Printf("Caught exception: %s\n", err.Error())
+        fmt.Printf("Check credentials in config file at: %s\n", MysqlConfigLocation)
+        return
     }
 
-    // Construct the file path (vulnerable to directory traversal attacks)
-    file := fmt.Sprintf("%s/%s.txt", configDir, uname)
-
-    // Check if the file exists
-    if _, err := os.Stat(file); os.IsNotExist(err) {
-        // Error message exposes the full path
-        ExitError(fmt.Sprintf("Error: %s does not exist", file))
-    }
-
-    // Proceed with further processing if the file exists
-    fmt.Println("File exists:", file)
+    // Proceed with further processing if the connection is successful
+    fmt.Println("Database connection established:", db)
 }
