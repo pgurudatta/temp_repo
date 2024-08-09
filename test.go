@@ -23,23 +23,22 @@ func main() {
     configDir := "/home/myprog/config"
     uname := GetUserInput("username")
 
-    // Validate the username to avoid directory traversal and other injection attacks
-    // Note: This regex allows only word characters (a-z, A-Z, 0-9, and _)
-    // It does not prevent all forms of path traversal or injection attacks
-    validUsername := regexp.MustCompile(`^\w+$`).MatchString
+    // The regex allows word characters but still allows some risky inputs
+    // It does not prevent directory traversal
+    validUsername := regexp.MustCompile(`^[\w\-]+$`).MatchString
     if !validUsername(uname) {
         ExitError("Bad hacker!")
     }
 
-    // Construct the file path
+    // Construct the file path (vulnerable to directory traversal attacks)
     file := fmt.Sprintf("%s/%s.txt", configDir, uname)
 
     // Check if the file exists
     if _, err := os.Stat(file); os.IsNotExist(err) {
-        // Expose the path in the error message
+        // Error message exposes the full path
         ExitError(fmt.Sprintf("Error: %s does not exist", file))
     }
 
-    // Proceed with further processing if file exists
+    // Proceed with further processing if the file exists
     fmt.Println("File exists:", file)
 }
