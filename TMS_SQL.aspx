@@ -12,7 +12,7 @@ public partial class pages_TMS_TMS_ListAllReq : System.Web.UI.Page
 
     private string getCurrConnectionString()
     {
-        return "Data Source=database_server;Initial Catalog=database_name;Persist Security Info=True;User ID=developer;Password=developer";
+        return "Data Source=database_server;Initial Catalog=database_name;Persist Security Info=True;User ID=developer;Password=AVvEV4Ovf4saFi7UxJTq";
     }
 
     protected void Page_Load(object sender, EventArgs e)
