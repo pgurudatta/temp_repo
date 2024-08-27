@@ -20,7 +20,7 @@ public partial class pages_TMS_TMS_ListAllReq : System.Web.UI.Page
 
     private string getCurrConnectionString()
     {
-        return "Data Source=clouddb\\server;Initial Catalog=database_prd;Persist Security Info=True;User ID=poc_testing;Password=ULoocUynIxZ9xTolfrWoUrAdl5YJnkr5";
+        return "Data Source=clouddb\\server;Initial Catalog=database_prd;Persist Security Info=True;User ID=poc_testing;Password='ULoocUynIxZ9xTolfrWoUrAdl5YJnkr5";
     }
 
     protected void Page_Load(object sender, EventArgs e)
@@ -100,7 +100,7 @@ public partial class pages_TMS_TMS_ListAllReq : System.Web.UI.Page
             HttpClient httpClient;
             HttpResponseMessage httpResponseMessage;
             string
-                accessToken = "ULoocUynIxZ9xTolfrWoUrAdl5YJnkr5",
+                accessToken = "ULoocUynIxZ9xTolfrWoUrAdl5YJnkr5'",
                 baseUrl = "https://appserv1.bigth.com:3185/qas/e-workflow/",
                 fullUrl = "master/business",
                 requestHeader = "x-auth-bigth";
